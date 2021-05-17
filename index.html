@@ -42,12 +42,16 @@
 <!-- we're using d3 version 6 (the latest version) for all out work -->
 <script src="https://d3js.org/d3.v6.min.js"></script>
 
+<!-- load topojson script -->
+<script src="https://unpkg.com/topojson@3"></script>
+
 <script>
-    // console.log(d3)
+    console.log({d3})
+    console.log({topojson})
 
     // //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise
     Promise.all([ //waits for all the data to load, then when loaded will return it all in one array called res
-        d3.json('county.json'),
+        d3.json('county-topo-2.json'),
     ])
         .then(ready)
         .catch((err) => {
@@ -56,34 +60,32 @@
 
     function ready(res) {
         console.log(res[0])
-        let data = res[0]
+        let raw = res[0]
+
+        let data = topojson.feature(raw, raw.objects.county);
+
         let width = 1050;
         let height = 500;
 
-        console.log(data.features)
+        console.log(data)
 
         let svg = d3.select("body").select("svg")
 
         let myProjection = d3.geoAlbersUsa()
             .fitSize([width, height], data)
-
+        
         //path function
         let path = d3.geoPath()
             .projection(myProjection)
 
-        // svg.append("path")
-        //     .attr("d", path(data))
-        //     .style("fill", "none")
-        //     .style("stroke", "#333")
-
-        svg.append("g")
+        svg
             .selectAll(".counties")
             .data(data.features)
             .join("path")
             .attr("d", path)
-            .attr("class", d => d.properties.GEOID)
             .style("fill", "none")
             .style("stroke", "#333")
+            .style("stroke-width", .2)
 
     }
 
